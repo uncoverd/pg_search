@@ -36,7 +36,7 @@ module PgSearch
           selects_for_multiple_association
         end
       end
-
+#reject{|element| element.send(:column_name).starts_with?('"ts_')}
       def selects_for_singular_association
         columns.map do |column|
           "#{column.full_name}::text AS #{column.alias}"
@@ -45,7 +45,7 @@ module PgSearch
 
       def selects_for_multiple_association
         columns.map do |column|
-          "string_agg(#{column.full_name}::text, ' ') AS #{column.alias}"
+          "#{column.full_name}::tsvector AS #{column.alias}"
         end.join(", ")
       end
 

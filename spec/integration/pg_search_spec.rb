@@ -981,6 +981,7 @@ describe "an Active Record model which includes PgSearch" do
         table do |t|
           t.integer :post_id
           t.string :body
+          t.tsvector 'ts_body'
         end
 
         model do
@@ -1012,8 +1013,13 @@ describe "an Active Record model which includes PgSearch" do
         expected.comments.create(body: 'commentone')
         unexpected.comments.create(body: 'commentwo')
 
+        ActiveRecord::Base.connection.execute <<-SQL.strip_heredoc
+          UPDATE #{Comment.quoted_table_name}
+          SET ts_body = to_tsvector('english'::regconfig, #{Comment.quoted_table_name}."body")
+        SQL
+
         Post.pg_search_scope :search_by_content_with_tsvector,
-          :associated_against => { comments: [:body] },
+          :associated_against => { comments: [:ts_body] },
           :using => {
             :tsearch => {
               :tsvector_column => 'content_tsvector',
@@ -1054,7 +1060,6 @@ describe "an Active Record model which includes PgSearch" do
       it 'concats tsvector columns' do
         expected = "#{ModelWithTsvector.quoted_table_name}.\"content_tsvector\" || "\
                    "#{ModelWithTsvector.quoted_table_name}.\"message_tsvector\""
-
         expect(ModelWithTsvector.search_by_multiple_tsvector_columns("something").to_sql).to include(expected)
       end
     end

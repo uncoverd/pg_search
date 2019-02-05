@@ -7,7 +7,7 @@ module PgSearch
   module Features
     class TSearch < Feature # rubocop:disable Metrics/ClassLength
       def self.valid_options
-        super + %i[dictionary prefix negation any_word normalization tsvector_column highlight]
+        super + %i[dictionary prefix negation any_word normalization tsvector_column tsvector_associations highlight]
       end
 
       def conditions
@@ -192,6 +192,8 @@ module PgSearch
       end
 
       def column_to_tsvector(search_column)
+        return search_column.send(:expression) if search_column.send(:column_name).start_with?('"ts')
+
         tsvector = Arel::Nodes::NamedFunction.new(
           "to_tsvector",
           [dictionary, Arel.sql(normalize(search_column.to_sql))]

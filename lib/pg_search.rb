@@ -14,6 +14,7 @@ require "pg_search/scope_options"
 require "pg_search/version"
 
 module PgSearch
+  require 'pry'
   extend ActiveSupport::Concern
 
   mattr_accessor :multisearch_options
