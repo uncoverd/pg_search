@@ -7,7 +7,7 @@ module PgSearch
   module Features
     class TSearch < Feature # rubocop:disable Metrics/ClassLength
       def self.valid_options
-        super + %i[dictionary prefix negation any_word normalization tsvector_column tsvector_associations highlight]
+        super + %i[dictionary prefix negation any_word normalization tsvector_column highlight]
       end
 
       def conditions
